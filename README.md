@@ -26,3 +26,9 @@ CSE will generate a "\<symbol file\> - EXPORT.SYM_XML" file, containing only the
 There are two other ways to easily generate the stripped symbol files:
 * create a macro in CoDeSys, which calls CSE with the symbol file as parameter, and add this macro as a post-build step
 * in the Windows explorer, associate the .SYM_XML extension with CSE. Then you will generate the needed file by clicking the .SYM_XML file produced by CoDeSys
+
+
+*Sources and license*
+CSE is released under the terms of the GNU General Public License v3.
+Sources are available here: https://github.com/Folcogh/CSE/
+The project has been build with Visual Studio Community 2017
