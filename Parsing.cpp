@@ -234,6 +234,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
 
                     // Symbol ?
                     if (isalpha(Declaration[Offset])) {
+						Offset --; // We don't want to skip that char
                         break;
                     }
                 }
