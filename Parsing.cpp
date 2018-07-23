@@ -97,8 +97,9 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
             ((unsigned char)buffer[POUoffset + 3] << 24);
         POUoffset += 4;
 
-        // Don't parse the POU if it's size is null
-        if (Length == 0) {
+        // Don't parse the POU if it's size is null or rogue
+        // This prevents to parse out of the buffer
+        if ((Length == 0) || (Length > projectsize - POUoffset)) {
             continue;
         }
 
@@ -121,7 +122,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
 
         // Look for an identifier. Exported variables can be found in programs and global variable lists.
         // So we look for the string "PROGRAM" or "GLOBAL_VAR"
-		while (Offset < Declaration.size()) {
+        while (Offset < Declaration.size()) {
             // Program ?
             if (Declaration.compare(Offset, sizeof(PROGRAM_IDENTIFIER) - 1, PROGRAM_IDENTIFIER) == 0) {
                 Offset += sizeof(PROGRAM_IDENTIFIER) - 1;
@@ -130,7 +131,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                 }
                 break;
             }
-
+    
             // Global var ?
             else if (Declaration.compare(Offset, sizeof(GLOBAL_VAR_IDENTIFIER) - 1, GLOBAL_VAR_IDENTIFIER) == 0) {
                 POUtype = POU_GLOBAL_VAR;
@@ -173,7 +174,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
         // Exported variables parsing
         //
 
-		while (Offset < Declaration.size()) {
+        while (Offset < Declaration.size()) {
             string SymbolName("");
             // Symbol ?
             if (isalpha(Declaration[Offset])) {
@@ -195,7 +196,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
 
                 // Look for a semicolon
                 bool SemicolonFound = false;
-				while (Offset < Declaration.size()) {
+                while (Offset < Declaration.size()) {
                     // Semicolon ?
                     if (Declaration[Offset] == ';') {
                         SemicolonFound = true;
@@ -207,10 +208,10 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                         SkipComment(Declaration, Offset);
                     }
 
-					// Skip any other char
-					else {
-						Offset ++;
-					}
+                    // Skip any other char
+                    else {
+                        Offset ++;
+                    }
                 }
 
                 // Check that a semicolon were found, else continue with the next POU
@@ -219,7 +220,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                 }
 
                 // Check for the export tag in the next comment
-				while (Offset < Declaration.size()) {
+                while (Offset < Declaration.size()) {
                     // Comment ?
                     if (Declaration.compare(Offset, sizeof(COMMENT_START) - 1, COMMENT_START) == 0) {
                         unsigned int InitOffset = Offset;
@@ -232,7 +233,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                             index.back().Variables.push_back(variable);
                         }
 
-						// Continue with the next symbol
+                        // Continue with the next symbol
                         break;
                     }
 
@@ -241,10 +242,10 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                         break;
                     }
 
-					// Skip any other char
-					else {
-						Offset ++;
-					}
+                    // Skip any other char
+                    else {
+                        Offset ++;
+                    }
                 }
             }
 
@@ -253,10 +254,10 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
                 SkipComment(Declaration, Offset);
             }
 
-			// Skip any other char
-			else {
-				Offset ++;
-			}
+            // Skip any other char
+            else {
+                Offset ++;
+            }
         }
     }
 }
@@ -265,7 +266,7 @@ void IndexExportedVariables(vector<POU>& index, const char* buffer, const unsign
 // Find a program name, return true if one is found   
 bool GetProgramName(const string& declaration, unsigned int& offset, string& name)
 {
-	while (offset < declaration.size()) {
+    while (offset < declaration.size()) {
         // Symbol ?
         if (isalpha(declaration[offset])) {
             while (isalnum(declaration[offset]) || (declaration[offset] == '_')) {
@@ -275,15 +276,15 @@ bool GetProgramName(const string& declaration, unsigned int& offset, string& nam
         }
 
         // Comment ?
-		else if (declaration.compare(offset, sizeof(COMMENT_START) - 1, COMMENT_START) == 0) {
+        else if (declaration.compare(offset, sizeof(COMMENT_START) - 1, COMMENT_START) == 0) {
             SkipComment(declaration, offset);
             offset --; // The loop will skip the last comment char
-		 }
+         }
 
-		 // Skip any other char
-		else {
-			offset ++;
-		}
+         // Skip any other char
+        else {
+            offset ++;
+        }
     }
 
     // No name found
